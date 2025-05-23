@@ -38,3 +38,32 @@ This project analyzes and benchmarks F1 driver performance using machine learnin
 
 ## 📁 Project Structure (Coming Soon)
 
+
+---
+
+## 🚧 Roadmap
+
+- [ ] Ingest telemetry + lap data from 2021–2024 seasons
+- [ ] Feature engineering pipeline (pace, deltas, overtake rate)
+- [ ] Train baseline performance scoring model
+- [ ] Integrate SHAP values for explainability
+- [ ] Build dashboard/visual summary per driver & race
+- [ ] Package as web app or shareable notebook
+
+---
+
+## 🤝 Contributions Welcome
+
+Have ideas, data sources, or visual improvements? Open an issue or submit a PR!
+
+---
+
+## 📬 Let's Connect
+
+- [LinkedIn](https://www.linkedin.com/in/rrembert)
+- [Twitter](https://twitter.com/RichardDRembert)
+
+---
+
+**License**: MIT  
+
