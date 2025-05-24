@@ -1,52 +1,51 @@
 import streamlit as st
 import pandas as pd
-import joblib
-import shap
-import streamlit.components.v1 as components
+import os
 
-# Load model
-model = joblib.load("models/driver_score_model.pkl")
+st.set_page_config(page_title="F1 Race Explorer", layout="wide")
 
-# Sample driver data
-driver_data = {
-    "Hamilton": [0.42, 0.29],
-    "Verstappen": [0.78, 0.22],
-    "Leclerc": [0.30, 0.35],
-    "Alonso": [0.52, 0.40],
-    "Norris": [0.41, 0.26],
-}
+# Path to sessions
+SESSION_DIR = "data/sessions"
 
-drivers = list(driver_data.keys())
-features = ["pace_delta_vs_teammate", "lap_time_std_dev"]
+# Helper to extract year and race from filenames
+def get_race_info():
+    files = [f for f in os.listdir(SESSION_DIR) if f.endswith(".csv")]
+    races = []
+    for f in files:
+        parts = f.replace(".csv", "").split("_")
+        year = parts[0]
+        name = " ".join(parts[1:-1])
+        races.append((year, name, f))
+    return races
 
-# --- UI
-st.set_page_config(page_title="F1 Driver Analyzer", layout="wide")
-st.sidebar.title("🏁 F1 Driver Selector")
-selected_driver = st.sidebar.selectbox("Choose a driver", drivers)
+races = get_race_info()
 
-st.title("🏎️ F1 Driver Performance Analyzer")
-st.caption("Powered by AI + real telemetry data")
+# Create dropdowns
+years = sorted(set([r[0] for r in races]), reverse=True)
+selected_year = st.sidebar.selectbox("Select Year", years)
 
-# --- Prediction
-X = pd.DataFrame([driver_data[selected_driver]], columns=features)
-prediction = model.predict(X)[0]
+race_names = [r[1] for r in races if r[0] == selected_year]
+selected_race = st.sidebar.selectbox("Select Race", race_names)
 
-# --- Display Results
-st.metric("🏆 Predicted Score", f"{prediction:.2f}")
-st.write("### 📊 Driver Feature Vector")
-st.dataframe(X)
+# Load race file
+race_file = [r[2] for r in races if r[0] == selected_year and r[1] == selected_race][0]
+df = pd.read_csv(os.path.join(SESSION_DIR, race_file))
 
-# --- SHAP Force Plot (safe for Streamlit)
-st.write("### 🔍 SHAP Force Plot Explanation")
+st.title(f"🏁 {selected_race} {selected_year} - Driver Comparison")
 
-explainer = shap.Explainer(model, X)
-shap_values = explainer(X)
+drivers = df['Driver'].unique()
+driver1 = st.selectbox("Select Driver 1", drivers, index=0)
+driver2 = st.selectbox("Select Driver 2", drivers, index=1)
 
-# Render JS-based SHAP force plot
-shap_html = shap.plots.force(shap_values[0], matplotlib=False)
-components.html(shap.getjs() + shap_html.html(), height=400, scrolling=True)
+# Compare stats
+st.subheader("📊 Lap Time Comparison")
+lap_data = df[df['Driver'].isin([driver1, driver2])]
 
- # Clear to prevent reuse on next render
+if not lap_data.empty:
+    st.line_chart(lap_data.pivot(index='LapNumber', columns='Driver', values='LapTime'))
+else:
+    st.warning("No lap time data available for selected drivers.")
+
 
 
 
