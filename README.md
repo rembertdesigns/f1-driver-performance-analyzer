@@ -19,36 +19,69 @@ This project analyzes and benchmarks F1 driver performance using machine learnin
 ## 🛠️ Tech Stack
 
 - **Language**: Python
-- **Modeling**: TensorFlow or PyTorch
-- **Notebook Interface**: Jupyter
+- **Notebook Interface**: Jupyter (via Cursor IDE)
+- **Data Retrieval**: FastF1 (F1 telemetry + timing)
 - **Visualization**: Matplotlib, Seaborn, SHAP
-- **Data**: [Formula 1 telemetry & race data](https://ergast.com/mrd/), FastF1, or custom datasets
+- **ML Modeling**: Scikit-learn (Linear Regression baseline), SHAP
+- **Future Option**: TensorFlow or PyTorch for deep models
 
 ---
 
 ## 🧠 Core Features
 
-- Load & preprocess telemetry and race data
-- Extract features: pace vs. teammate, overtakes, lap-by-lap consistency
-- Train regression/classification model for performance scoring
-- Apply SHAP or attention layers to interpret model predictions
-- Export driver performance dashboards (PDF/HTML)
+- ✅ Load and cache real telemetry data using FastF1
+- 📈 Extract pace delta vs. teammate and lap consistency (std dev)
+- 🤖 Train regression model to score drivers numerically
+- 🔍 Interpret model predictions using SHAP values
+- 💾 Export performance vectors and predictions to CSV
+- 📊 Save visuals of lap speed profiles and SHAP plots
 
 ---
 
-## 📁 Project Structure (Coming Soon)
+## 📁 Project Structure
 
+---
+
+## 🧪 Example Visuals
+
+### SHAP Summary: What Influences Driver Score?
+<img src="visualizations/shap_summary.png" width="600"/>
+
+### Lap Speed Profile: Hamilton at Bahrain FP1
+<img src="visualizations/hamilton_speed.png" width="600"/>
+
+---
+
+## 🚀 Run It Locally
+
+```bash
+git clone git@github.com:rembertdesigns/f1-driver-performance-analyzer.git
+cd f1-driver-performance-analyzer
+
+# (Optional) Create a virtual environment
+python3 -m venv venv
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Launch notebook
+jupyter notebook
+```
 
 ---
 
 ## 🚧 Roadmap
 
-- [ ] Ingest telemetry + lap data from 2021–2024 seasons
-- [ ] Feature engineering pipeline (pace, deltas, overtake rate)
-- [ ] Train baseline performance scoring model
-- [ ] Integrate SHAP values for explainability
-- [ ] Build dashboard/visual summary per driver & race
-- [ ] Package as web app or shareable notebook
+- [x] Ingest FastF1 telemetry + lap data  
+- [x] Feature engineering (pace delta, lap std dev)  
+- [x] Train baseline ML model  
+- [x] Integrate SHAP for explainability  
+- [x] Save predictions and plots to GitHub  
+- [ ] Expand to multiple races and drivers  
+- [ ] Add overtake & sector-based features  
+- [ ] Build dashboard view (Streamlit or Gradio)  
+- [ ] Optional: switch to deep learning + attention layers  
 
 ---
 
@@ -60,10 +93,12 @@ Have ideas, data sources, or visual improvements? Open an issue or submit a PR!
 
 ## 📬 Let's Connect
 
-- [LinkedIn](https://www.linkedin.com/in/rrembert)
+- [LinkedIn](https://www.linkedin.com/in/rrembert)  
 - [Twitter](https://twitter.com/RichardDRembert)
 
 ---
 
-**License**: MIT  
+## 📄 License
+
+MIT
 
