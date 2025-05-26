@@ -2,133 +2,152 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
-import numpy as np
+from pathlib import Path
 
-# Set up the page layout
-st.set_page_config(layout="wide", page_title="F1 Driver Analyzer")
+# Set Streamlit page configuration
+st.set_page_config(page_title="F1 Driver Performance Analyzer", layout="wide")
 
-# App title
+# Directory containing session CSVs
+data_dir = Path("data/sessions")
+
+# Extract all available years from filenames
+def get_available_years():
+    return sorted({fname.name[:4] for fname in data_dir.glob("*.csv")})
+
+# Load CSVs by year
+@st.cache_data
+def load_files_by_year(year):
+    files = list(data_dir.glob(f"{year}_*.csv"))
+    return sorted(files)
+
+# Load and process race data
+@st.cache_data
+def load_race_data(filepath):
+    df = pd.read_csv(filepath)
+    # Clean time-related columns for consistency
+    if 'LapTime' in df.columns:
+        df['LapTimeSeconds'] = pd.to_timedelta(df['LapTime']).dt.total_seconds()
+    return df
+
+# Format race name for display
+def format_race_name(filename):
+    return filename.stem.replace("_RACE", "").replace("_", " ")
+
+# Styling function for DataFrame display
+def style_dataframe(df):
+    numeric_cols = df.select_dtypes(include=['number']).columns
+    styled = (
+        df.style
+        .set_properties(**{
+            "background-color": "#ffffff",
+            "color": "#000000"
+        })
+        .highlight_max(subset=numeric_cols, axis=0, props='color: #006400; font-weight: bold')
+    )
+    return styled
+
+# --- Sidebar UI ---
 st.sidebar.title("🏁 Navigation")
-view = st.sidebar.radio("Select View", [
+view_option = st.sidebar.radio("Select View", [
     "Fastest & Most Consistent Driver",
     "Driver vs Driver",
     "Teammate Comparison",
-    "Career Summary"
+    "Driver Summary"
 ])
 
-# Load races by year
-data_path = "data/sessions"
-all_files = sorted([f for f in os.listdir(data_path) if f.endswith(".csv")])
+years = get_available_years()
+selected_year = st.sidebar.selectbox("Select Year", years)
+races = load_files_by_year(selected_year)
+formatted_race_names = [format_race_name(f) for f in races]
+race_file = st.sidebar.selectbox("Select Race", races, format_func=format_race_name)
+df = load_race_data(race_file)
 
-# Extract unique years
-available_years = sorted(set([f.split("_")[0] for f in all_files]))
-selected_year = st.sidebar.selectbox("Select Year", available_years)
-races = [f for f in all_files if f.startswith(selected_year)]
+# --- Fastest & Most Consistent ---
+if view_option == "Fastest & Most Consistent Driver":
+    st.markdown("## 🏎️ F1 Race Fastest & Most Consistent Driver")
+    st.subheader(f"{format_race_name(race_file)}")
 
-# Clean display names
-race_display_names = [
-    race_file.replace(".csv", "").replace("_RACE", "").replace("_", " ") for race_file in races
-]
-race_file_map = dict(zip(race_display_names, races))
-selected_display = st.sidebar.selectbox("Select Race", race_display_names)
-selected_race_file = race_file_map[selected_display]
+    df_valid = df[df['LapTimeSeconds'].notna()]
+    fastest_laps = df_valid.groupby("Driver")["LapTimeSeconds"].min()
+    lap_std = df_valid.groupby("Driver")["LapTimeSeconds"].std()
 
-# Load the race data
-file_path = os.path.join(data_path, selected_race_file)
-df = pd.read_csv(file_path)
+    fastest_driver = fastest_laps.idxmin()
+    fastest_time = fastest_laps.min()
 
-# Preprocessing
-if "LapTime" in df.columns:
-    df = df[df["LapTime"].notnull()]
-    df["LapTimeSeconds"] = pd.to_timedelta(df["LapTime"]).dt.total_seconds()
+    consistent_driver = lap_std.idxmin()
+    consistency = lap_std.min()
 
-# View: Fastest & Most Consistent Driver
-if view == "Fastest & Most Consistent Driver":
-    st.title("🏎️ F1 Race Fastest & Most Consistent Driver")
-    st.subheader(selected_display)
+    col1, col2 = st.columns(2)
+    col1.metric("⚡ Fastest Driver", fastest_driver, f"↓ {fastest_time:.3f}s")
+    col2.metric("💕 Most Consistent", consistent_driver, f"±{consistency:.3f}s")
 
-    if df.empty or df["LapTimeSeconds"].isnull().all():
-        st.warning("No valid lap time data available for this race.")
-    else:
-        fastest_laps = df.groupby("Driver")["LapTimeSeconds"].min()
-        fastest_driver = fastest_laps.idxmin()
-        fastest_time = fastest_laps.min()
+    st.markdown("### 📄 Raw Lap Data")
+    st.dataframe(style_dataframe(df), use_container_width=True, hide_index=True)
 
-        std_dev = df.groupby("Driver")["LapTimeSeconds"].std()
-        consistent_driver = std_dev.idxmin()
-        consistency_value = std_dev.min()
-
-        col1, col2 = st.columns(2)
-        col1.metric("⚡ Fastest Driver", fastest_driver, f"↓ {fastest_time:.3f}s")
-        col2.metric("💕 Most Consistent", consistent_driver, f"±{consistency_value:.3f}s")
-
-        st.subheader("📄 Raw Lap Data")
-        st.dataframe(df)
-
-# View: Driver vs Driver Comparison
-elif view == "Driver vs Driver":
-    st.title(f"🏁 {selected_display} - Driver Comparison")
-    drivers = df["Driver"].unique()
-    d1 = st.selectbox("Select Driver 1", drivers, key="d1")
-    d2 = st.selectbox("Select Driver 2", drivers, key="d2")
+# --- Driver vs Driver ---
+elif view_option == "Driver vs Driver":
+    st.markdown(f"## 🏁 {format_race_name(race_file)} - Driver Comparison")
+    drivers = df["Driver"].dropna().unique()
+    driver1 = st.selectbox("Select Driver 1", drivers, index=0)
+    driver2 = st.selectbox("Select Driver 2", drivers, index=1)
 
     fig, ax = plt.subplots()
-    for driver in [d1, d2]:
-        lap_data = df[df["Driver"] == driver]
-        ax.plot(lap_data["LapNumber"], lap_data["LapTimeSeconds"], label=driver, marker='o')
+    for d in [driver1, driver2]:
+        driver_data = df[df["Driver"] == d]
+        ax.plot(driver_data["LapNumber"], driver_data["LapTimeSeconds"], label=d)
 
-    ax.set_title(f"Lap Time Comparison: {d1} vs {d2}")
+    ax.set_title(f"Lap Time Comparison: {driver1} vs {driver2}")
     ax.set_xlabel("Lap Number")
     ax.set_ylabel("Lap Time (s)")
     ax.legend()
     st.pyplot(fig)
 
-# View: Teammate Comparison
-elif view == "Teammate Comparison":
-    st.title(f"👥 Teammate Lap Time Comparison - {selected_display}")
-    if "Team" not in df.columns:
-        st.warning("Team data is not available in this file.")
+# --- Teammate Comparison ---
+elif view_option == "Teammate Comparison":
+    st.markdown(f"## 👥 Teammate Lap Time Comparison - {format_race_name(race_file)}")
+    teams = df["Team"].dropna().unique()
+    selected_team = st.selectbox("Select Team", teams)
+
+    team_data = df[df["Team"] == selected_team]
+    teammates = team_data["Driver"].unique()
+
+    if len(teammates) == 2:
+        fig, ax = plt.subplots()
+        for t in teammates:
+            laps = team_data[team_data["Driver"] == t]
+            ax.plot(laps["LapNumber"], laps["LapTimeSeconds"], label=t, marker='o')
+
+        ax.set_title(f"Lap Time Comparison: {teammates[0]} vs {teammates[1]}")
+        ax.set_xlabel("Lap Number")
+        ax.set_ylabel("Lap Time (s)")
+        ax.legend()
+        st.pyplot(fig)
     else:
-        teams = df["Team"].dropna().unique()
-        selected_team = st.selectbox("Select Team", teams)
-        team_data = df[df["Team"] == selected_team]
+        st.warning("Selected team does not have exactly 2 drivers in this race.")
 
-        teammates = team_data["Driver"].unique()
-        if len(teammates) < 2:
-            st.warning("Less than two drivers found for this team.")
-        else:
-            fig, ax = plt.subplots()
-            for driver in teammates:
-                driver_data = team_data[team_data["Driver"] == driver]
-                ax.plot(driver_data["LapNumber"], driver_data["LapTimeSeconds"], label=driver, marker='o')
-            ax.set_title(f"Lap Time Comparison: {teammates[0]} vs {teammates[1]}")
-            ax.set_xlabel("Lap Number")
-            ax.set_ylabel("Lap Time (s)")
-            ax.legend()
-            st.pyplot(fig)
+# --- Driver Summary ---
+elif view_option == "Driver Summary":
+    st.markdown(f"## 🧑‍✈️ Driver Summary - {format_race_name(race_file)}")
+    drivers = df["Driver"].dropna().unique()
+    selected_driver = st.selectbox("Select Driver", drivers)
 
-# View: Career Summary
-elif view == "Career Summary":
-    st.title("🏆 Driver Career Summary")
-    driver_options = df["Driver"].unique()
-    selected_driver = st.selectbox("Select Driver", driver_options)
+    driver_data = df[df["Driver"] == selected_driver]
 
-    driver_df = df[df["Driver"] == selected_driver]
-
-    st.metric("Total Laps Completed", len(driver_df))
-    st.metric("Average Lap Time", f"{driver_df['LapTimeSeconds'].mean():.2f} s")
-    st.metric("Best Lap Time", f"{driver_df['LapTimeSeconds'].min():.2f} s")
-
-    st.subheader("Lap Times")
+    st.markdown("### 🔍 Lap Time Chart")
     fig, ax = plt.subplots()
-    ax.plot(driver_df["LapNumber"], driver_df["LapTimeSeconds"], marker='o')
-    ax.set_title(f"Lap Time Trend: {selected_driver}")
-    ax.set_xlabel("Lap")
+    ax.plot(driver_data["LapNumber"], driver_data["LapTimeSeconds"], marker='o')
+    ax.set_xlabel("Lap Number")
     ax.set_ylabel("Lap Time (s)")
+    ax.set_title(f"Lap Times for {selected_driver}")
     st.pyplot(fig)
 
-    st.subheader("Driver Lap Summary")
-    st.dataframe(driver_df)
+    st.markdown("### 🧾 Full Lap Data")
+    st.dataframe(style_dataframe(driver_data), use_container_width=True, hide_index=True)
+
+
+
+
+
 
 
 
