@@ -25,7 +25,8 @@ view = st.radio("🧭 Select View", [
     "Driver vs Driver",
     "Teammate Comparison",
     "Career Overview",
-    "Stint Performance Breakdown"
+    "Stint Performance Breakdown",
+    "Tyre Compound Performance Viewer"
 ])
 
 # Sidebar: Year and Race Selection
@@ -44,46 +45,30 @@ df = pd.read_csv(filepath)
 
 # Convert LapTime to seconds for calculations if not already
 if df["LapTime"].dtype != "float64":
-    df["LapTimeSeconds"] = pd.to_timedelta(df["LapTime"]).dt.total_seconds()
+    df["LapTimeSeconds"] = pd.to_timedelta(df["LapTime"], errors='coerce').dt.total_seconds()
 else:
     df["LapTimeSeconds"] = df["LapTime"]
 
 if view == "Fastest & Most Consistent Driver":
     st.subheader(f"📉 {selected_race_label} - Driver Analysis")
-    
     df_valid = df.dropna(subset=["LapTimeSeconds"])
-
-    # Fastest driver
     fastest_laps = df_valid.groupby("Driver")["LapTimeSeconds"].min()
     fastest_driver = fastest_laps.idxmin()
     fastest_time = fastest_laps.min()
-
-    # Most consistent driver (lowest standard deviation)
     consistency = df_valid.groupby("Driver")["LapTimeSeconds"].std()
     most_consistent_driver = consistency.idxmin()
     consistency_time = consistency.min()
-
     col1, col2 = st.columns(2)
-    with col1:
-        st.markdown("**⚡ Fastest Driver**")
-        st.subheader(fastest_driver)
-        st.success(f"⬆️ {fastest_time:.3f}s")
-
-    with col2:
-        st.markdown("**💕 Most Consistent**")
-        st.subheader(most_consistent_driver)
-        st.success(f"⬆️ ±{consistency_time:.3f}s")
-
+    col1.metric("⚡ Fastest Driver", fastest_driver, f"⬆️ {fastest_time:.3f}s")
+    col2.metric("💕 Most Consistent", most_consistent_driver, f"⬆️ ±{consistency_time:.3f}s")
     st.subheader("📄 Raw Lap Data")
     st.dataframe(df, use_container_width=True, hide_index=True)
 
 elif view == "Driver vs Driver":
     st.subheader(f"🏁 {selected_race_label} - Driver Comparison")
-
     drivers = df["Driver"].unique()
     driver1 = st.selectbox("Select Driver 1", drivers)
     driver2 = st.selectbox("Select Driver 2", drivers, index=1 if len(drivers) > 1 else 0)
-
     fig, ax = plt.subplots()
     for driver in [driver1, driver2]:
         driver_data = df[df["Driver"] == driver]
@@ -96,11 +81,9 @@ elif view == "Driver vs Driver":
 
 elif view == "Teammate Comparison":
     st.subheader(f"👥 Teammate Lap Time Comparison - {selected_race_label}")
-
     teams = df["Team"].dropna().unique()
     selected_team = st.selectbox("Select Team", teams)
     teammates = df[df["Team"] == selected_team]["Driver"].unique()
-
     fig, ax = plt.subplots()
     for driver in teammates:
         driver_data = df[(df["Driver"] == driver) & (df["Team"] == selected_team)]
@@ -119,7 +102,6 @@ elif view == "Stint Performance Breakdown":
     st.subheader(f"🧪 Stint Performance - {selected_race_label}")
     drivers = df["Driver"].unique()
     selected_driver = st.selectbox("Select Driver", drivers)
-
     fig, ax = plt.subplots()
     for stint in sorted(df[df["Driver"] == selected_driver]["Stint"].dropna().unique()):
         stint_data = df[(df["Driver"] == selected_driver) & (df["Stint"] == stint)]
@@ -129,6 +111,31 @@ elif view == "Stint Performance Breakdown":
     ax.set_ylabel("Lap Time (s)")
     ax.legend()
     st.pyplot(fig)
+
+elif view == "Tyre Compound Performance Viewer":
+    st.subheader(f"🛞 Tyre Compound Performance - {selected_race_label}")
+    
+    compound_options = df["Compound"].dropna().unique().tolist()
+    selected_compound = st.selectbox("Select Compound", compound_options)
+    
+    filtered_df = df[df["Compound"] == selected_compound]
+    drivers = filtered_df["Driver"].dropna().unique()
+    
+    fig, ax = plt.subplots()
+    for driver in drivers:
+        driver_data = filtered_df[filtered_df["Driver"] == driver]
+        ax.plot(driver_data["LapNumber"], driver_data["LapTimeSeconds"], label=driver)
+    
+    ax.set_title(f"Lap Times on {selected_compound} Compound")
+    ax.set_xlabel("Lap Number")
+    ax.set_ylabel("Lap Time (s)")
+    
+    # ✅ Cleaner, smaller legend outside the chart
+    ax.legend(fontsize="x-small", loc="center left", bbox_to_anchor=(1, 0.5))
+    
+    st.pyplot(fig)
+
+
 
 
 
