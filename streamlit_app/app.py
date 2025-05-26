@@ -2,51 +2,54 @@ import streamlit as st
 import pandas as pd
 import os
 
+# Paths
+DATA_DIR = "./data/sessions"
+
+# Get available years and races
+years = sorted({f.split("_")[0] for f in os.listdir(DATA_DIR) if f.endswith(".csv")})
+races_by_year = {
+    year: sorted([f for f in os.listdir(DATA_DIR) if f.startswith(year) and f.endswith(".csv")])
+    for year in years
+}
+
+# --- UI
 st.set_page_config(page_title="F1 Race Explorer", layout="wide")
+st.title("🏎️ F1 Race Fastest & Most Consistent Driver")
 
-# Path to sessions
-SESSION_DIR = "data/sessions"
-
-# Helper to extract year and race from filenames
-def get_race_info():
-    files = [f for f in os.listdir(SESSION_DIR) if f.endswith(".csv")]
-    races = []
-    for f in files:
-        parts = f.replace(".csv", "").split("_")
-        year = parts[0]
-        name = " ".join(parts[1:-1])
-        races.append((year, name, f))
-    return races
-
-races = get_race_info()
-
-# Create dropdowns
-years = sorted(set([r[0] for r in races]), reverse=True)
+# Dropdowns
 selected_year = st.sidebar.selectbox("Select Year", years)
+selected_race_file = st.sidebar.selectbox("Select Race", races_by_year[selected_year])
 
-race_names = [r[1] for r in races if r[0] == selected_year]
-selected_race = st.sidebar.selectbox("Select Race", race_names)
+# Load session data
+df = pd.read_csv(os.path.join(DATA_DIR, selected_race_file))
 
-# Load race file
-race_file = [r[2] for r in races if r[0] == selected_year and r[1] == selected_race][0]
-df = pd.read_csv(os.path.join(SESSION_DIR, race_file))
+# Preprocess and validate
+if "Driver" in df.columns and "LapTime" in df.columns:
+    try:
+        df["LapTimeSeconds"] = pd.to_timedelta(df["LapTime"]).dt.total_seconds()
+        df_valid = df.dropna(subset=["Driver", "LapTimeSeconds"])
 
-st.title(f"🏁 {selected_race} {selected_year} - Driver Comparison")
+        if df_valid.empty or df_valid["LapTimeSeconds"].isnull().all():
+            st.error("❌ No valid lap time data found for this session.")
+        else:
+            # Fastest lap per driver
+            fastest_laps = df_valid.groupby("Driver")["LapTimeSeconds"].min()
+            lap_std = df_valid.groupby("Driver")["LapTimeSeconds"].std()
 
-drivers = df['Driver'].unique()
-driver1 = st.selectbox("Select Driver 1", drivers, index=0)
-driver2 = st.selectbox("Select Driver 2", drivers, index=1)
+            if not fastest_laps.empty and not lap_std.empty:
+                fastest_driver = fastest_laps.idxmin()
+                most_consistent = lap_std.idxmin()
 
-# Compare stats
-st.subheader("📊 Lap Time Comparison")
-lap_data = df[df['Driver'].isin([driver1, driver2])]
+                st.subheader(f"{selected_race_file.replace('_', ' ').replace('.csv','')}")
+                col1, col2 = st.columns(2)
+                col1.metric("⚡ Fastest Driver", fastest_driver, f"{fastest_laps.min():.3f}s")
+                col2.metric("🎯 Most Consistent", most_consistent, f"±{lap_std.min():.3f}s")
 
-if not lap_data.empty:
-    st.line_chart(lap_data.pivot(index='LapNumber', columns='Driver', values='LapTime'))
+                st.write("### 📄 Raw Lap Data")
+                st.dataframe(df_valid)
+            else:
+                st.warning("⚠️ Not enough lap data to calculate metrics.")
+    except Exception as e:
+        st.error(f"❌ Failed to process lap times: {e}")
 else:
-    st.warning("No lap time data available for selected drivers.")
-
-
-
-
-
+    st.warning("⚠️ This session file doesn't contain expected columns like 'Driver' and 'LapTime'.")
