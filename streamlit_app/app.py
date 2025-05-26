@@ -17,7 +17,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("🏎️ F1 Race Fastest & Most Consistent Driver")
+st.title("🏎️ F1 Driver Performance Analyzer")
 
 # Sidebar: View Selection
 view = st.radio("🧭 Select View", [
@@ -26,7 +26,8 @@ view = st.radio("🧭 Select View", [
     "Teammate Comparison",
     "Career Overview",
     "Stint Performance Breakdown",
-    "Tyre Compound Performance Viewer"
+    "Tyre Compound Performance Viewer",
+    "Summary Insights"
 ])
 
 # Sidebar: Year and Race Selection
@@ -48,6 +49,58 @@ if df["LapTime"].dtype != "float64":
     df["LapTimeSeconds"] = pd.to_timedelta(df["LapTime"], errors='coerce').dt.total_seconds()
 else:
     df["LapTimeSeconds"] = df["LapTime"]
+
+# ---------- Summary Insights Feature ----------
+def get_fastest_driver(data):
+    no_pit = data[data["PitOutTime"].isnull() & data["PitInTime"].isnull()]
+    return no_pit.groupby("Driver")["LapTimeSeconds"].mean().idxmin(), round(no_pit.groupby("Driver")["LapTimeSeconds"].mean().min(), 3)
+
+def get_most_consistent_stint(data):
+    consistency = data.groupby(["Driver", "Stint"])['LapTimeSeconds'].std()
+    return consistency.idxmin(), round(consistency.min(), 3)
+
+def get_biggest_dropoff(data):
+    stint_avg = data.groupby(["Driver", "Stint"])['LapTimeSeconds'].mean().unstack()
+    dropoff = (stint_avg.diff(axis=1)).max(axis=1)
+    return dropoff.idxmax(), round(dropoff.max(), 3)
+
+def get_pit_impact(data):
+    if "PitInTime" not in data.columns:
+        return None, None
+    pit_laps = data[data['PitInTime'].notnull()]
+    impacts = []
+    for _, row in pit_laps.iterrows():
+        driver = row['Driver']
+        lap = int(row['LapNumber'])
+        before = data[(data['Driver'] == driver) & (data['LapNumber'] == lap - 1)]["LapTimeSeconds"]
+        after = data[(data['Driver'] == driver) & (data['LapNumber'] == lap + 1)]["LapTimeSeconds"]
+        if not before.empty and not after.empty:
+            delta = abs(after.values[0] - before.values[0])
+            impacts.append((driver, delta))
+    if impacts:
+        worst = max(impacts, key=lambda x: x[1])
+        return worst[0], round(worst[1], 3)
+    return None, None
+
+if view == "Summary Insights":
+    st.subheader(f"📊 Summary Insights - {selected_race_label}")
+    col1, col2 = st.columns(2)
+    with col1:
+        fastest_driver, fastest_avg = get_fastest_driver(df)
+        st.metric("🏁 Fastest Avg Lap (no pits)", fastest_driver, f"{fastest_avg}s")
+    with col2:
+        (cons_driver, stint), consist_std = get_most_consistent_stint(df)
+        st.metric("🔁 Most Consistent Stint", f"{cons_driver} - Stint {stint}", f"±{consist_std}s")
+    col3, col4 = st.columns(2)
+    with col3:
+        fade_driver, drop = get_biggest_dropoff(df)
+        st.metric("📉 Biggest Lap Time Fade", fade_driver, f"+{drop}s")
+    with col4:
+        pit_driver, impact = get_pit_impact(df)
+        if pit_driver:
+            st.metric("🧪 Pit Strategy Impact", pit_driver, f"Δ{impact}s")
+        else:
+            st.info("No pit stop data available.")
 
 if view == "Fastest & Most Consistent Driver":
     st.subheader(f"📉 {selected_race_label} - Driver Analysis")
