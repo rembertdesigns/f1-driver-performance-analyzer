@@ -1,54 +1,90 @@
+# === app.py ===
 import streamlit as st
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 import os
-import numpy as np
+import joblib
 
+# Page setup
 st.set_page_config(layout="wide")
-st.markdown("""
-    <style>
-        .block-container {
-            padding: 2rem 3rem;
-        }
-        .stRadio > label {
-            display: block;
-            margin-bottom: 0.5rem;
-        }
-    </style>
-""", unsafe_allow_html=True)
-
 st.title("🏎️ F1 Driver Performance Analyzer")
 
-# Sidebar: View Selection
+# Sidebar view selector
 view = st.radio("🧭 Select View", [
     "Fastest & Most Consistent Driver",
     "Driver vs Driver",
     "Teammate Comparison",
-    "Career Overview",
     "Stint Performance Breakdown",
     "Tyre Compound Performance Viewer",
-    "Summary Insights"
+    "Summary Insights",
+    "Driver Scoring"
 ])
 
-# Sidebar: Year and Race Selection
-years = sorted(list({f.split("_")[0] for f in os.listdir("data/sessions") if f.endswith(".csv")}))
+# Select Year and Race
+years = sorted({f.split("_")[0] for f in os.listdir("data/sessions") if f.endswith(".csv")})
 selected_year = st.selectbox("Select Year", years)
-
 race_files = [f for f in os.listdir("data/sessions") if f.startswith(selected_year)]
 race_labels = [f.replace(".csv", "").replace("_RACE", "").replace("_", " ") for f in race_files]
 race_file_map = dict(zip(race_labels, race_files))
 selected_race_label = st.selectbox("Select Race", race_labels)
 selected_race_file = race_file_map[selected_race_label]
 
-# Load session data
-filepath = os.path.join("data/sessions", selected_race_file)
-df = pd.read_csv(filepath)
-
-# Convert LapTime to seconds for calculations if not already
+# Load data
+df = pd.read_csv(f"data/sessions/{selected_race_file}")
 if df["LapTime"].dtype != "float64":
-    df["LapTimeSeconds"] = pd.to_timedelta(df["LapTime"], errors='coerce').dt.total_seconds()
+    df["LapTimeSeconds"] = pd.to_timedelta(df["LapTime"], errors="coerce").dt.total_seconds()
 else:
     df["LapTimeSeconds"] = df["LapTime"]
+
+# ---------- DRIVER SCORING ----------
+if view == "Driver Scoring":
+    st.subheader(f"🏁 AI Driver Scoring - {selected_race_label}")
+    import joblib
+
+    model = joblib.load("models/driver_score_model.pkl")
+
+    df_valid = df.dropna(subset=["LapTimeSeconds", "Team", "Compound"])
+    if df_valid.empty:
+        st.warning("No valid lap data available.")
+    else:
+        # ➕ Compute features
+        df_valid["TeamAvg"] = df_valid.groupby("Team")["LapTimeSeconds"].transform("mean")
+        df_valid["pace_vs_teammate"] = df_valid["TeamAvg"] - df_valid["LapTimeSeconds"]
+        df_valid["lap_time_std_dev"] = df_valid.groupby("Driver")["LapTimeSeconds"].transform("std")
+        df_valid["avg_stint_length"] = df_valid.groupby("Driver")["Stint"].transform("count")
+        df_valid["compound_type"] = df_valid["Compound"].map({"SOFT": 0, "MEDIUM": 1, "HARD": 2}).fillna(3)
+
+        # ➕ Aggregate to driver-level
+        driver_features = df_valid.groupby("Driver")[[
+            "pace_vs_teammate",
+            "lap_time_std_dev",
+            "avg_stint_length",
+            "compound_type"
+        ]].mean()
+
+        driver_features = driver_features.dropna()
+
+        # ✅ Predict
+        scores = model.predict(driver_features)
+        driver_features["Score"] = scores
+
+        # 📊 Show styled DataFrame
+        styled_df = (
+            driver_features
+            .sort_values("Score", ascending=False)
+            .style
+            .format("{:.4f}")
+            .background_gradient(subset=["Score"], cmap="Greens")
+            .set_properties(**{
+                "text-align": "center",
+                "border": "1px solid #444",
+                "font-family": "monospace",
+            })
+        )
+
+        st.markdown("#### 🧠 **Predicted Driver Scores** (Higher is Better)")
+        st.dataframe(styled_df, use_container_width=True, hide_index=False)
 
 # ---------- Summary Insights Feature ----------
 def get_fastest_driver(data):
@@ -146,10 +182,6 @@ elif view == "Teammate Comparison":
     ax.set_ylabel("Lap Time (s)")
     ax.legend()
     st.pyplot(fig)
-
-elif view == "Career Overview":
-    st.subheader("📈 Driver Career Overview (Coming Soon)")
-    st.info("This feature is under development and will be live in a future update.")
 
 elif view == "Stint Performance Breakdown":
     st.subheader(f"🧪 Stint Performance - {selected_race_label}")
