@@ -1,104 +1,121 @@
 # 🏎️ F1 Driver Performance Analyzer
 
-An AI-powered tool that scores Formula 1 drivers based on telemetry data, overtaking stats, race consistency, and pace relative to their teammates. Built for explainability using SHAP and attention mechanisms to uncover what matters most.
+An interactive Streamlit app that breaks down Formula 1 driver performance using lap-by-lap data, stint strategy, tire compound trends, and AI-powered scoring. Perfect for fans, analysts, and engineers who want data-driven insights at their fingertips.
+
+🔗 **Live App**: [Streamlit Community Cloud](https://f1-driver-performance-analyzer.streamlit.app/)  
+📦 **Repo**: https://github.com/rembertdesigns/f1-driver-performance-analyzer
 
 ---
 
-## 📊 Project Overview
+## 📊 What It Does
 
-This project analyzes and benchmarks F1 driver performance using machine learning models trained on real race data. It provides interpretable insights into which variables—such as overtakes, pace, and consistency—most influence a driver’s performance rating.
+This tool lets users explore any F1 race (2018–2022) and compare drivers on key performance metrics like lap time consistency, stint strategy, tire degradation, and more. It also includes an AI-driven scoring engine to rate drivers based on pace, tire use, and teammate delta.
 
-### Goals:
-- 🔍 Quantify driver skill in a data-driven, unbiased way
-- 🤖 Use AI to spot patterns across different tracks, weather, and team setups
-- 🧠 Provide explainable output (via SHAP values or attention maps)
-- 📈 Visualize trends across teammates, seasons, and circuits
+---
+
+## 🧠 Key Features
+
+- 🧭 **Race Selector** – Choose year & race dynamically (based on CSVs in `data/sessions/`)
+- ⚡ **Fastest & Most Consistent Driver** – See who had the fastest lap and most stable pace
+- 🆚 **Driver vs Driver** – Head-to-head lap time comparison
+- 👥 **Teammate Comparison** – Analyze intra-team performance
+- 📈 **Career Overview** – View all races a driver participated in
+- 🧪 **Stint Performance Breakdown** – Track pace drop-off across stints
+- 🛞 **Tyre Compound Viewer** – Analyze lap times based on compound type
+- 🧠 **Summary Insights** – Key race takeaways: fastest avg lap, consistency, pit impact
+- 🏁 **Driver Scoring (AI)** – Predict scores using regression model trained on stint & tire data
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Language**: Python
-- **Notebook Interface**: Jupyter (via Cursor IDE)
-- **Data Retrieval**: FastF1 (F1 telemetry + timing)
-- **Visualization**: Matplotlib, Seaborn, SHAP
-- **ML Modeling**: Scikit-learn (Linear Regression baseline), SHAP
-- **Future Option**: TensorFlow or PyTorch for deep models
+- **Frontend**: [Streamlit](https://streamlit.io)
+- **Data Source**: Preprocessed FastF1 data in CSV format
+- **ML Engine**: Scikit-learn (Linear Regression)
+- **Visualization**: Matplotlib
+- **Model Storage**: `joblib` + `models/` directory
 
 ---
 
-## 🧠 Core Features
+## 📁 File Structure
 
-- ✅ Load and cache real telemetry data using FastF1
-- 📈 Extract pace delta vs. teammate and lap consistency (std dev)
-- 🤖 Train regression model to score drivers numerically
-- 🔍 Interpret model predictions using SHAP values
-- 💾 Export performance vectors and predictions to CSV
-- 📊 Save visuals of lap speed profiles and SHAP plots
-
----
-
-## 📁 Project Structure
-
----
-
-## 🧪 Example Visuals
-
-### SHAP Summary: What Influences Driver Score?
-<img src="visualizations/shap_summary.png" width="600"/>
-
-### Lap Speed Profile: Hamilton at Bahrain FP1
-<img src="visualizations/hamilton_speed.png" width="600"/>
-
+```bash
+.
+├── streamlit_app/
+│   ├── app.py                # Main Streamlit app
+│   ├── train_model.py        # ML training script
+│   ├── inspect_model.py      # Helper script to debug features
+├── data/
+│   └── sessions/             # Race .csv files
+├── models/
+│   └── driver_score_model.pkl
+├── requirements.txt
+└── README.md
+```
 ---
 
 ## 🚀 Run It Locally
 
 ```bash
-git clone git@github.com:rembertdesigns/f1-driver-performance-analyzer.git
+
+git clone https://github.com/rembertdesigns/f1-driver-performance-analyzer.git
 cd f1-driver-performance-analyzer
 
-# (Optional) Create a virtual environment
-python3 -m venv venv
-source venv/bin/activate
+# (Optional) Set up a virtual environment
+python3 -m venv .venv
+source .venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
 
-# Launch notebook
-jupyter notebook
+# Launch app
+streamlit run streamlit_app/app.py
 ```
-
 ---
 
-## 🚧 Roadmap
+## 📈 Roadmap
 
-- [x] Ingest FastF1 telemetry + lap data  
-- [x] Feature engineering (pace delta, lap std dev)  
-- [x] Train baseline ML model  
-- [x] Integrate SHAP for explainability  
-- [x] Save predictions and plots to GitHub  
-- [ ] Expand to multiple races and drivers  
-- [ ] Add overtake & sector-based features  
-- [ ] Build dashboard view (Streamlit or Gradio)  
-- [ ] Optional: switch to deep learning + attention layers  
+ - Build lap comparison & teammate tabs
+ - Add stint + tire compound analysis
+ - Train ML model for driver scoring
+ - Add summary insights panel
+ - Launch to Streamlit Community Cloud
+ - Add seasonal teammate battles
+ - Implement driver trend dashboard
+ - Add advanced metrics: overtakes, tire degradation rate
+ - Optional: upgrade model to deep learning (attention-based)
 
----
+ ---
+ 
+## 🧠 Sample Insight: AI Driver Scoring
 
+Using features like:
+
+- Stint average length
+- Lap time consistency (std dev)
+- Tire compound usage
+- Pace delta vs teammate
+  
+We score drivers using a trained regression model. This helps compare performance in a normalized way across different races and teams.
+
+ ---
+
+## 🔍 Keywords for Discoverability
+
+```
+F1 analytics, Formula 1, driver comparison, teammate battle, stint analysis, tire strategy, lap time analysis, Streamlit F1, F1 data app, motorsport ML, AI in racing, race telemetry, FastF1, driver scoring model
+```
+ ---
+ 
 ## 🤝 Contributions Welcome
 
-Have ideas, data sources, or visual improvements? Open an issue or submit a PR!
+Open to pull requests, issue reports, or feedback. Want to help with tire modeling or ML enhancements? Let’s talk.
 
----
+## 📬 Connect
 
-## 📬 Let's Connect
-
-- [LinkedIn](https://www.linkedin.com/in/rrembert)  
-- [Twitter](https://twitter.com/RichardDRembert)
-
----
+- LinkedIn → [Richard Rembert](https://www.linkedin.com/in/rrembert/)
+- Twitter → [@RichardDRembert](https://x.com/RichardDRembert)
 
 ## 📄 License
 
-MIT
-
+MIT License
