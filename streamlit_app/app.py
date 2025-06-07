@@ -1,4 +1,3 @@
-# === app.py (Enhanced with Tabs, Plotly, Hero Cards, and Corrected Data Loading) ===
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -25,7 +24,6 @@ PROJECT_ROOT = os.path.abspath(os.path.join(APP_DIR, '..'))
 DATA_DIR = os.path.join(PROJECT_ROOT, "data", "sessions")
 MODELS_DIR = os.path.join(PROJECT_ROOT, "models")
 
-
 # --- Data Loading (Cached for Performance & ENHANCED ERROR HANDLING) ---
 @st.cache_data
 def load_session_data(file_path):
@@ -40,11 +38,7 @@ def load_session_data(file_path):
     if "LapTime" not in df.columns:
         return pd.DataFrame(), f"The file '{os.path.basename(file_path)}' is missing the required 'LapTime' column."
 
-    # --- FIX: Force the LapTime column to be a string before conversion ---
-    # This prevents pandas from misinterpreting the data type on read.
     df['LapTime'] = df['LapTime'].astype(str)
-
-    # Now, attempt the conversion to seconds.
     df['LapTimeSeconds'] = pd.to_timedelta(df['LapTime'], errors='coerce').dt.total_seconds()
     
     initial_rows = len(df)
@@ -59,13 +53,13 @@ def load_session_data(file_path):
         )
         return pd.DataFrame(), error_message
 
-    return df, None # Return None for error message if successful
+    return df, None
 
 # --- Sidebar for Global Filters ---
 st.sidebar.header(" Race Selection")
 
 if not os.path.exists(DATA_DIR):
-    st.sidebar.error(f"Data directory not found at: '{os.path.abspath(DATA_DIR)}'. Please check your project structure.")
+    st.sidebar.error(f"Data directory not found at the expected location: '{os.path.abspath(DATA_DIR)}'. Please check your project structure.")
     st.stop()
 
 all_files = [f for f in os.listdir(DATA_DIR) if f.endswith(".csv")]
@@ -165,15 +159,13 @@ with tab_fastest:
     
     if not df_valid.empty:
         fastest_laps = df_valid.groupby("Driver")["LapTimeSeconds"].min()
-        fastest_driver = fastest_laps.idxmin()
-        fastest_time = fastest_laps.min()
         consistency = df_valid.groupby("Driver")["LapTimeSeconds"].std().dropna()
-        most_consistent_driver = consistency.idxmin()
-        consistency_time = consistency.min()
 
         col1, col2 = st.columns(2)
-        col1.metric("⚡ Fastest Single Lap", fastest_driver, f"{fastest_time:.3f}s")
-        col2.metric("⚙️ Most Consistent Driver (Lap Time Std Dev)", most_consistent_driver, f"±{consistency_time:.3f}s")
+        if not fastest_laps.empty:
+            col1.metric("⚡ Fastest Single Lap", fastest_laps.idxmin(), f"{fastest_laps.min():.3f}s")
+        if not consistency.empty:
+            col2.metric("⚙️ Most Consistent Driver (Lap Time Std Dev)", consistency.idxmin(), f"±{consistency.min():.3f}s")
     else:
         st.warning("Not enough valid data to determine fastest or most consistent driver.")
 
@@ -184,52 +176,58 @@ with tab_fastest:
 # --- TAB 3: Driver vs Driver ---
 with tab_compare:
     st.subheader("Head-to-Head Lap Time Comparison")
-    
     drivers_with_teams = df[['Driver', 'Team']].drop_duplicates().sort_values(by="Driver")
     
-    st.markdown("##### Select two drivers to compare:")
-    
-    if 'd1_select' not in st.session_state: st.session_state.d1_select = drivers_with_teams['Driver'].iloc[0] if not drivers_with_teams.empty else None
-    if 'd2_select' not in st.session_state: st.session_state.d2_select = drivers_with_teams['Driver'].iloc[1] if len(drivers_with_teams) > 1 else None
-
-    cols = st.columns(4)
-    for i, row in enumerate(drivers_with_teams.itertuples()):
-        with cols[i % 4]:
-            with st.container(border=True):
-                st.markdown(f"**{row.Driver}**")
-                st.caption(row.Team)
-                if st.button("Select as #1", key=f"d1_{row.Driver}", use_container_width=True):
-                    st.session_state.d1_select = row.Driver
-                    st.rerun() 
-                if st.button("Select as #2", key=f"d2_{row.Driver}", use_container_width=True):
-                    st.session_state.d2_select = row.Driver
-                    st.rerun()
-
-    st.divider()
-    c1, c2, c3 = st.columns([1,1,2])
-    c1.metric("Driver 1", st.session_state.d1_select or "Not Selected")
-    c2.metric("Driver 2", st.session_state.d2_select or "Not Selected")
-
-    if st.session_state.d1_select and st.session_state.d2_select and st.session_state.d1_select != st.session_state.d2_select:
-        compare_df = df[df["Driver"].isin([st.session_state.d1_select, st.session_state.d2_select])]
+    if len(drivers_with_teams) >= 2:
+        st.markdown("##### Select two drivers to compare:")
         
-        d1_team = compare_df[compare_df['Driver'] == st.session_state.d1_select]['Team'].iloc[0]
-        d2_team = compare_df[compare_df['Driver'] == st.session_state.d2_select]['Team'].iloc[0]
-        driver_color_map = {
-            st.session_state.d1_select: TEAM_COLORS.get(d1_team, "#FFFFFF"),
-            st.session_state.d2_select: TEAM_COLORS.get(d2_team, "#CCCCCC")
-        }
+        if 'd1_select' not in st.session_state: st.session_state.d1_select = drivers_with_teams['Driver'].iloc[0]
+        if 'd2_select' not in st.session_state: st.session_state.d2_select = drivers_with_teams['Driver'].iloc[1]
 
-        fig = px.line(
-            compare_df, x="LapNumber", y="LapTimeSeconds", color="Driver",
-            title=f"Lap Time Comparison: {st.session_state.d1_select} vs {st.session_state.d2_select}",
-            labels={"LapNumber": "Lap Number", "LapTimeSeconds": "Lap Time (s)"},
-            markers=True, color_discrete_map=driver_color_map
-        )
-        fig.update_traces(hovertemplate='<b>Lap %{x}</b><br>Time: %{y:.3f}s<extra></extra>')
-        st.plotly_chart(fig, use_container_width=True)
+        cols = st.columns(4)
+        for i, row in enumerate(drivers_with_teams.itertuples()):
+            with cols[i % 4]:
+                with st.container(border=True):
+                    st.markdown(f"**{row.Driver}**"); st.caption(row.Team)
+                    if st.button("Select as #1", key=f"d1_{row.Driver}", use_container_width=True):
+                        st.session_state.d1_select = row.Driver; st.rerun()
+                    if st.button("Select as #2", key=f"d2_{row.Driver}", use_container_width=True):
+                        st.session_state.d2_select = row.Driver; st.rerun()
+
+        st.divider()
+        c1, c2, c3 = st.columns([1,1,2])
+        c1.metric("Driver 1", st.session_state.d1_select or "Not Selected")
+        c2.metric("Driver 2", st.session_state.d2_select or "Not Selected")
+
+        if st.session_state.d1_select and st.session_state.d2_select and st.session_state.d1_select != st.session_state.d2_select:
+            compare_df = df[df["Driver"].isin([st.session_state.d1_select, st.session_state.d2_select])]
+            
+            # --- FIX: Defensively get team colors ---
+            d1_team_series = compare_df[compare_df['Driver'] == st.session_state.d1_select]['Team']
+            d2_team_series = compare_df[compare_df['Driver'] == st.session_state.d2_select]['Team']
+
+            if not d1_team_series.empty and not d2_team_series.empty:
+                d1_team = d1_team_series.iloc[0]
+                d2_team = d2_team_series.iloc[0]
+                driver_color_map = {
+                    st.session_state.d1_select: TEAM_COLORS.get(d1_team, "#FFFFFF"),
+                    st.session_state.d2_select: TEAM_COLORS.get(d2_team, "#CCCCCC")
+                }
+
+                fig = px.line(
+                    compare_df, x="LapNumber", y="LapTimeSeconds", color="Driver",
+                    title=f"Lap Time Comparison: {st.session_state.d1_select} vs {st.session_state.d2_select}",
+                    labels={"LapNumber": "Lap Number", "LapTimeSeconds": "Lap Time (s)"},
+                    markers=True, color_discrete_map=driver_color_map
+                )
+                fig.update_traces(hovertemplate='<b>Lap %{x}</b><br>Time: %{y:.3f}s<extra></extra>')
+                st.plotly_chart(fig, use_container_width=True)
+            else:
+                st.warning("Could not find data for one of the selected drivers to generate plot.")
+        else:
+            st.info("Please select two different drivers using the buttons above.")
     else:
-        st.info("Please select two different drivers using the buttons above.")
+        st.warning("Not enough drivers in the data to make a comparison.")
 
 
 # --- TAB 4: Teammate Comparison ---
@@ -243,7 +241,6 @@ with tab_teammate:
         if len(teammates) >= 2:
             teammate_data = df[df["Driver"].isin(teammates)]
             team_color = TEAM_COLORS.get(selected_team, "#CCCCCC") 
-            
             fig = px.line(
                 teammate_data, x="LapNumber", y="LapTimeSeconds", color="Driver",
                 title=f"Teammate Comparison: {selected_team}",
@@ -253,16 +250,13 @@ with tab_teammate:
             if len(fig.data) == 2:
                 fig.data[0].line.color = team_color; fig.data[0].line.dash = 'solid'
                 fig.data[1].line.color = team_color; fig.data[1].line.dash = 'dot'
-
             fig.update_traces(hovertemplate='<b>Lap %{x}</b><br>Time: %{y:.3f}s<br>Compound: %{customdata[0]}<extra></extra>',
                               customdata=teammate_data[['Compound']])
             st.plotly_chart(fig, use_container_width=True)
-
             with st.expander("🔍 Analysis & Interpretation"):
                 st.markdown("""This chart directly compares teammates in the same machinery, providing one of the purest measures of driver performance.
                 - **Crossover Points:** Laps where one driver becomes faster than the other can indicate who managed their tires better or who adapted to changing conditions.
                 - **Consistent Gaps:** A consistent gap in favor of one driver can signify a clear pace advantage during this race.""")
-
         elif len(teammates) == 1: st.warning(f"Only one driver ({teammates[0]}) found for {selected_team} in this race's data.")
         else: st.warning(f"No driver data found for {selected_team}.")
 
@@ -284,7 +278,6 @@ with tab_stint:
         fig.update_traces(hovertemplate='<b>Lap %{x}</b><br>Time: %{y:.3f}s<br>Tire: %{customdata[0]}<extra></extra>',
                           customdata=stint_data[['Compound']])
         st.plotly_chart(fig, use_container_width=True)
-
         with st.expander("🔍 Analysis & Interpretation"):
             st.markdown("""This chart shows the driver's pace across different stints.
             * **Pace Drop-off:** A rising trend in lap times within a single stint indicates high tire degradation (the "performance cliff").
@@ -298,7 +291,6 @@ with tab_tyre:
     if compound_options:
         selected_compound = st.selectbox("Select Compound", compound_options, key="tyre_compound_select")
         filtered_df = df[df["Compound"] == selected_compound]
-        
         fig = px.line(
             filtered_df, x="LapNumber", y="LapTimeSeconds", color="Driver",
             title=f"Lap Times on {selected_compound} Compound",
@@ -313,7 +305,6 @@ with tab_tyre:
 with tab_scoring:
     st.subheader("AI-Powered Driver Score")
     st.info("This score is generated by a pre-trained model that evaluates performance based on several key metrics from the race.")
-    
     MODEL_PATH = os.path.join(MODELS_DIR, "driver_score_model.pkl")
 
     try:
