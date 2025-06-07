@@ -84,8 +84,6 @@ pip install -r requirements.txt
 # Launch app
 streamlit run streamlit_app/app.py
 ```
----
-
 
 ---
 
@@ -113,3 +111,35 @@ venv\Scripts\activate
 ```bash
 pip install -r requirements.txt
 ```
+---
+
+## 🚀 Running the Application
+
+> 📁 **Important**: Ensure you have the necessary `.csv` race data in `data/sessions/` and the trained model `driver_score_model.pkl` in `models/`.
+
+From the project root, run:
+
+```bash
+streamlit run streamlit_app/app.py
+```
+Then open the URL in your browser (typically http://localhost:8501).
+
+---
+
+## 🛣️ Future Enhancements
+
+- **Integrate Telemetry Data**
+Use the `fastf1` library to pull and visualize detailed telemetry (speed, throttle, brake) for head-to-head lap comparisons.
+- **Race Start Analysis**
+Show positions gained or lost on the opening lap.
+- **Qualifying Data Integration**
+Load and compare qualifying results, including season teammate head-to-head records.
+- **Driver & Team Season Summaries**
+Aggregate performance data across an entire season.
+- **Saving/Loading App State**
+Allow saving current selections to a shareable URL.
+
+---
+
+## 📄 License
+This project is licensed under the MIT License.
