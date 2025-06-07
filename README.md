@@ -1,5 +1,7 @@
 # 🏎️ F1 Driver Performance Analyzer
 
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://f1-driver-performance-analyzer.streamlit.app/)
+
 An interactive, multi-view dashboard built with Python and Streamlit to analyze and compare Formula 1 driver performance from historical race data.
 
 This application provides a suite of tools for exploring lap times, comparing drivers head-to-head, analyzing teammate performance, breaking down stints, and even uses a machine learning model to generate a performance score for each driver.
