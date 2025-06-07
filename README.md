@@ -1,55 +1,68 @@
 # 🏎️ F1 Driver Performance Analyzer
 
-An interactive Streamlit app that breaks down Formula 1 driver performance using lap-by-lap data, stint strategy, tire compound trends, and AI-powered scoring. Perfect for fans, analysts, and engineers who want data-driven insights at their fingertips.
+An interactive, multi-view dashboard built with Python and Streamlit to analyze and compare Formula 1 driver performance from historical race data.
 
-🔗 **Live App**: [Streamlit Community Cloud](https://f1-driver-performance-analyzer.streamlit.app/)  
-📦 **Repo**: https://github.com/rembertdesigns/f1-driver-performance-analyzer
-
----
-
-## 📊 What It Does
-
-This tool lets users explore any F1 race (2018–2022) and compare drivers on key performance metrics like lap time consistency, stint strategy, tire degradation, and more. It also includes an AI-driven scoring engine to rate drivers based on pace, tire use, and teammate delta.
+This application provides a suite of tools for exploring lap times, comparing drivers head-to-head, analyzing teammate performance, breaking down stints, and even uses a machine learning model to generate a performance score for each driver.
 
 ---
 
-## 🧠 Key Features
+## ✨ Key Features
 
-- 🧭 **Race Selector** – Choose year & race dynamically (based on CSVs in `data/sessions/`)
-- ⚡ **Fastest & Most Consistent Driver** – See who had the fastest lap and most stable pace
-- 🆚 **Driver vs Driver** – Head-to-head lap time comparison
-- 👥 **Teammate Comparison** – Analyze intra-team performance
-- 📈 **Career Overview** – View all races a driver participated in
-- 🧪 **Stint Performance Breakdown** – Track pace drop-off across stints
-- 🛞 **Tyre Compound Viewer** – Analyze lap times based on compound type
-- 🧠 **Summary Insights** – Key race takeaways: fastest avg lap, consistency, pit impact
-- 🏁 **Driver Scoring (AI)** – Predict scores using regression model trained on stint & tire data
+### Modern Tabbed Dashboard
+A clean, intuitive user interface built with `st.tabs` that organizes different analyses into logical sections for easy navigation.
+
+### Interactive Data Visualization
+All charts are created with Plotly for a rich, interactive experience, including tooltips, zoom, and pan capabilities.
+
+### Comprehensive Analysis Views
+- **Summary Insights**: High-level metrics at a glance, including fastest average lap, most consistent stint, and biggest performance drop-off.
+- **Driver vs. Driver**: A head-to-head lap time comparison between any two drivers in the race.
+- **Teammate Comparison**: The ultimate F1 benchmark, comparing two drivers in the same machinery.
+- **Stint & Tyre Performance**: Analyze pace degradation and performance across different tire stints and compounds.
+
+### AI-Powered Scoring
+Integrates a pre-trained Scikit-learn model (`driver_score_model.pkl`) to generate a performance score for each driver based on key race metrics, with results displayed in a styled table.
+
+### Robust Data Handling
+The app gracefully handles different data formats and includes checks for missing or invalid data to ensure a smooth user experience.
+
+### Dynamic Filtering
+Users can easily select the **year** and **race** they want to analyze from the available data.
 
 ---
 
-## 🛠️ Tech Stack
+## 🛠️ Technologies Used
 
-- **Frontend**: [Streamlit](https://streamlit.io)
-- **Data Source**: Preprocessed FastF1 data in CSV format
-- **ML Engine**: Scikit-learn (Linear Regression)
-- **Visualization**: Matplotlib
-- **Model Storage**: `joblib` + `models/` directory
+- **Core**: Python 3.10+
+- **User Interface & Visualization**: Streamlit, Plotly, Pandas
+- **Machine Learning**: Scikit-learn, Joblib
+- **Data Handling**: NumPy, Pandas
 
 ---
 
-## 📁 File Structure
+## 🧱 Project Structure
 
 ```bash
-.
-├── streamlit_app/
-│   ├── app.py                # Main Streamlit app
-│   ├── train_model.py        # ML training script
-│   ├── inspect_model.py      # Helper script to debug features
+f1-driver-performance-analyzer/
+│
 ├── data/
-│   └── sessions/             # Race .csv files
+│ └── sessions/
+│ └── e.g., 2024_Bahrain_Grand_Prix_RACE.csv
+│
 ├── models/
-│   └── driver_score_model.pkl
-├── requirements.txt
+│ └── driver_score_model.pkl
+│
+├── streamlit_app/
+│ └── app.py # The main Streamlit application script
+│
+├── notebooks/
+│ └── EDA.ipynb # Exploratory Data Analysis notebook
+│
+├── src/
+│ └── data_loader.py # Example helper script
+│
+├── train_model.py # Script to train the driver score model
+├── requirements.txt # Python package dependencies
 └── README.md
 ```
 ---
