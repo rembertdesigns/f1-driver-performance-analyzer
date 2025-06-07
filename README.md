@@ -86,49 +86,30 @@ streamlit run streamlit_app/app.py
 ```
 ---
 
-## 📈 Roadmap
 
- - Build lap comparison & teammate tabs
- - Add stint + tire compound analysis
- - Train ML model for driver scoring
- - Add summary insights panel
- - Launch to Streamlit Community Cloud
- - Add seasonal teammate battles
- - Implement driver trend dashboard
- - Add advanced metrics: overtakes, tire degradation rate
- - Optional: upgrade model to deep learning (attention-based)
+---
 
- ---
- 
-## 🧠 Sample Insight: AI Driver Scoring
+## 🚀 Getting Started
 
-Using features like:
+### Prerequisites
+- Python 3.10 or newer
+- `pip` for package installation
 
-- Stint average length
-- Lap time consistency (std dev)
-- Tire compound usage
-- Pace delta vs teammate
-  
-We score drivers using a trained regression model. This helps compare performance in a normalized way across different races and teams.
+### Installation
 
- ---
-
-## 🔍 Keywords for Discoverability
-
+1. **Clone the repository:**
+```bash
+git clone https://github.com/rembertdesigns/f1-driver-performance-analyzer.git
+cd f1-driver-performance-analyzer
 ```
-F1 analytics, Formula 1, driver comparison, teammate battle, stint analysis, tire strategy, lap time analysis, Streamlit F1, F1 data app, motorsport ML, AI in racing, race telemetry, FastF1, driver scoring model
+2. **Create and activate a virtual environment (recommended):**
+```bash
+python3 -m venv venv
+source venv/bin/activate  # On macOS/Linux
+# On Windows:
+venv\Scripts\activate
 ```
- ---
- 
-## 🤝 Contributions Welcome
-
-Open to pull requests, issue reports, or feedback. Want to help with tire modeling or ML enhancements? Let’s talk.
-
-## 📬 Connect
-
-- LinkedIn → [Richard Rembert](https://www.linkedin.com/in/rrembert/)
-- Twitter → [@RichardDRembert](https://x.com/RichardDRembert)
-
-## 📄 License
-
-MIT License
+3. **Install dependencies:**
+```bash
+pip install -r requirements.txt
+```
