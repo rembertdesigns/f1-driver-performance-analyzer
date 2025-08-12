@@ -2,9 +2,9 @@
 
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://f1-driver-performance-analyzer.streamlit.app/)
 
-An interactive, multi-view dashboard built with Python and Streamlit to analyze and compare Formula 1 driver performance from historical race data.
+An interactive, multi-view dashboard built with Python and Streamlit to analyze and compare Formula 1 driver performance from historical race data using FastF1 telemetry.
 
-This application provides a suite of tools for exploring lap times, comparing drivers head-to-head, analyzing teammate performance, breaking down stints, and even uses a machine learning model to generate a performance score for each driver.
+This application provides a comprehensive suite of tools for exploring lap times, comparing drivers head-to-head, analyzing teammate performance, breaking down stints, and even uses a machine learning model to generate performance scores for each driver.
 
 ---
 
@@ -17,28 +17,35 @@ A clean, intuitive user interface built with `st.tabs` that organizes different 
 All charts are created with Plotly for a rich, interactive experience, including tooltips, zoom, and pan capabilities.
 
 ### Comprehensive Analysis Views
-- **Summary Insights**: High-level metrics at a glance, including fastest average lap, most consistent stint, and biggest performance drop-off.
-- **Driver vs. Driver**: A head-to-head lap time comparison between any two drivers in the race.
-- **Teammate Comparison**: The ultimate F1 benchmark, comparing two drivers in the same machinery.
-- **Stint & Tyre Performance**: Analyze pace degradation and performance across different tire stints and compounds.
+- **📊 Summary Insights**: High-level race metrics including fastest average lap, most consistent stint, and biggest performance drop-off
+- **⚡ Fastest & Consistent**: Identify the fastest single lap and most consistent driver performances
+- **⚔️ Driver vs. Driver**: Head-to-head lap time comparison between any two drivers in the race
+- **👥 Teammate Comparison**: The ultimate F1 benchmark - comparing drivers in identical machinery
+- **🧪 Stint Performance**: Analyze pace degradation and performance across different tire stints
+- **🛞 Tyre Compounds**: Performance analysis by tire compound (Soft, Medium, Hard)
+- **🧠 AI Driver Scoring**: ML-powered performance scoring based on key race metrics
 
-### AI-Powered Scoring
-Integrates a pre-trained Scikit-learn model (`driver_score_model.pkl`) to generate a performance score for each driver based on key race metrics, with results displayed in a styled table.
+### AI-Powered Performance Scoring
+Integrates a pre-trained Scikit-learn model (`driver_score_model.pkl`) to generate comprehensive performance scores for each driver based on:
+- Pace relative to teammate
+- Lap time consistency (standard deviation)
+- Average stint length
+- Tire compound strategy
 
 ### Robust Data Handling
-The app gracefully handles different data formats and includes checks for missing or invalid data to ensure a smooth user experience.
-
-### Dynamic Filtering
-Users can easily select the **year** and **race** they want to analyze from the available data.
+- Graceful handling of different CSV formats and missing data
+- Comprehensive error checking and user feedback
+- Dynamic filtering by year and race
 
 ---
 
 ## 🛠️ Technologies Used
 
 - **Core**: Python 3.10+
-- **User Interface & Visualization**: Streamlit, Plotly, Pandas
+- **Data Analysis**: FastF1, Pandas, NumPy
+- **Visualization**: Streamlit, Plotly Express
 - **Machine Learning**: Scikit-learn, Joblib
-- **Data Handling**: NumPy, Pandas
+- **Model Explainability**: SHAP (Shapley Additive Explanations)
 
 ---
 
