@@ -37,6 +37,7 @@ All charts are created with Plotly for a rich, interactive experience, including
 <img width="1388" height="580" alt="Screenshot 2025-08-12 at 11 11 04 AM" src="https://github.com/user-attachments/assets/cde4bfb0-63ac-441d-8e2e-a415f689222a" />
 
 - **🧠 AI Driver Scoring**: ML-powered performance scoring based on key race metrics
+<img width="1381" height="649" alt="Screenshot 2025-08-12 at 11 15 49 AM" src="https://github.com/user-attachments/assets/9163a876-782d-408a-b719-714ac0784bd3" />
 
 ### AI-Powered Performance Scoring
 Integrates a pre-trained Scikit-learn model (`driver_score_model.pkl`) to generate comprehensive performance scores for each driver based on:
