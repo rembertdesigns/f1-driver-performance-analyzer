@@ -34,6 +34,8 @@ All charts are created with Plotly for a rich, interactive experience, including
 <img width="1390" height="830" alt="Screenshot 2025-08-12 at 11 08 32 AM" src="https://github.com/user-attachments/assets/583dec88-b04f-4b40-a0f6-ea102319131c" />
 
 - **🛞 Tyre Compounds**: Performance analysis by tire compound (Soft, Medium, Hard)
+<img width="1388" height="580" alt="Screenshot 2025-08-12 at 11 11 04 AM" src="https://github.com/user-attachments/assets/cde4bfb0-63ac-441d-8e2e-a415f689222a" />
+
 - **🧠 AI Driver Scoring**: ML-powered performance scoring based on key race metrics
 
 ### AI-Powered Performance Scoring
