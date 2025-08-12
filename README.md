@@ -49,54 +49,36 @@ Integrates a pre-trained Scikit-learn model (`driver_score_model.pkl`) to genera
 
 ---
 
-## 🧱 Project Structure
+# 🧱 Project Structure
 
 ```bash
 f1-driver-performance-analyzer/
 │
 ├── data/
-│ └── sessions/
-│ └── e.g., 2024_Bahrain_Grand_Prix_RACE.csv
+│   └── sessions/              # Race CSV files (auto-generated)
+│       └── YYYY_RaceName_RACE.csv
 │
 ├── models/
-│ └── driver_score_model.pkl
+│   └── driver_score_model.pkl # Pre-trained ML model
 │
 ├── streamlit_app/
-│ └── app.py # The main Streamlit application script
+│   ├── app.py                 # Main Streamlit application
+│   └── inspect_model.py       # Model inspection utility
 │
 ├── notebooks/
-│ └── EDA.ipynb # Exploratory Data Analysis notebook
+│   └── EDA.ipynb             # Exploratory Data Analysis
 │
 ├── src/
-│ └── data_loader.py # Example helper script
+│   ├── __init__.py
+│   └── data_loader.py        # FastF1 data collection script
 │
-├── train_model.py # Script to train the driver score model
-├── requirements.txt # Python package dependencies
+├── train_model.py            # ML model training script
+├── requirements.txt          # Python dependencies
 └── README.md
 ```
 ---
 
-## 🚀 Run It Locally
-
-```bash
-
-git clone https://github.com/rembertdesigns/f1-driver-performance-analyzer.git
-cd f1-driver-performance-analyzer
-
-# (Optional) Set up a virtual environment
-python3 -m venv .venv
-source .venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Launch app
-streamlit run streamlit_app/app.py
-```
-
----
-
-## 🚀 Getting Started
+## 🚀 Quick Start
 
 ### Prerequisites
 - Python 3.10 or newer
@@ -105,50 +87,40 @@ streamlit run streamlit_app/app.py
 ### Installation
 
 1. **Clone the repository:**
-```bash
+```
 git clone https://github.com/rembertdesigns/f1-driver-performance-analyzer.git
 cd f1-driver-performance-analyzer
 ```
 2. **Create and activate a virtual environment (recommended):**
-```bash
+```
 python3 -m venv venv
 source venv/bin/activate  # On macOS/Linux
-# On Windows:
-venv\Scripts\activate
+# On Windows: venv\Scripts\activate
 ```
 3. **Install dependencies:**
-```bash
+```
 pip install -r requirements.txt
 ```
----
+### Data Collection
 
-## 🚀 Running the Application
+4. **Collect F1 race data using FastF1:**
+```
+python src/data_loader.py
+```
+This will download race data from 2018-2024 and save CSV files to `data/sessions/`.
 
-> 📁 **Important**: Ensure you have the necessary `.csv` race data in `data/sessions/` and the trained model `driver_score_model.pkl` in `models/`.
+### Model Training
 
-From the project root, run:
+5. **Train the AI scoring model:**
+```
+python train_model.py
+```
+This creates `driver_score_model.pkl` in the `models/ directory`.
 
-```bash
+### Running the Application
+
+6. **Launch the Streamlit app:**
+```
 streamlit run streamlit_app/app.py
 ```
-Then open the URL in your browser (typically http://localhost:8501).
-
----
-
-## 🛣️ Future Enhancements
-
-- **Integrate Telemetry Data**
-Use the `fastf1` library to pull and visualize detailed telemetry (speed, throttle, brake) for head-to-head lap comparisons.
-- **Race Start Analysis**
-Show positions gained or lost on the opening lap.
-- **Qualifying Data Integration**
-Load and compare qualifying results, including season teammate head-to-head records.
-- **Driver & Team Season Summaries**
-Aggregate performance data across an entire season.
-- **Saving/Loading App State**
-Allow saving current selections to a shareable URL.
-
----
-
-## 📄 License
-This project is licensed under the MIT License.
+Then open your browser to the URL shown (typically http://localhost:8501).
