@@ -2,6 +2,9 @@
 
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://f1-driver-performance-analyzer.streamlit.app/)
 
+<img width="1776" height="817" alt="Screenshot 2025-08-12 at 10 11 15 AM" src="https://github.com/user-attachments/assets/c9977c19-8d7a-485c-a9d4-1a5c7c9c160d" />
+
+
 An interactive, multi-view dashboard built with Python and Streamlit to analyze and compare Formula 1 driver performance from historical race data using FastF1 telemetry.
 
 This application provides a comprehensive suite of tools for exploring lap times, comparing drivers head-to-head, analyzing teammate performance, breaking down stints, and even uses a machine learning model to generate performance scores for each driver.
