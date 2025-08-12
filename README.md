@@ -124,3 +124,71 @@ This creates `driver_score_model.pkl` in the `models/ directory`.
 streamlit run streamlit_app/app.py
 ```
 Then open your browser to the URL shown (typically http://localhost:8501).
+
+---
+
+## 📊 How It Works
+
+### Data Pipeline
+1. **FastF1 Integration**: Automatically downloads telemetry data from Formula 1 races
+2. **Feature Engineering**: Calculates key performance metrics like pace vs. teammate and consistency
+3. **ML Scoring**: Uses linear regression to score driver performance holistically
+4. **Interactive Visualization**: Presents insights through dynamic Plotly charts
+
+### Key Metrics Explained
+- **Pace vs. Teammate**: How much faster/slower compared to team average
+- **Consistency**: Standard deviation of lap times (lower = more consistent)
+- **Stint Analysis**: Performance degradation over tire life
+- **Compound Strategy**: Performance differences across tire compounds
+
+---
+
+## 🔍 Model Explainability
+
+The project includes SHAP (SHapley Additive exPlanations) integration to understand:
+- Which features most influence driver scores
+- How individual predictions are made
+- Global feature importance across all drivers
+
+See `notebooks/EDA.ipynb` for detailed model analysis and feature importance visualizations.
+
+---
+
+## 🛣️ Future Enhancements
+
+- **Real-time Data Integration**: Live race analysis during GP weekends
+- **Advanced Telemetry**: Speed, throttle, and brake analysis using FastF1's full capabilities
+- **Weather Impact Analysis**: Correlation between weather conditions and performance
+- **Qualifying Integration**: Compare race pace to qualifying performance
+- **Season-long Analytics**: Championship standings and consistency over full seasons
+- **Predictive Modeling**: Predict race outcomes based on practice/qualifying data
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 Acknowledgments
+
+- **FastF1**: For providing excellent F1 telemetry data access
+- **Formula 1**: For the amazing sport and data availability
+- **Streamlit**: For the fantastic web app framework
+- **Plotly**: For interactive visualization capabilities
+
+---
+
+## ⚠️ Important Notes
+
+- Race data is sourced from FastF1 and covers seasons from 2018-2024
+- Initial data download may take some time due to FastF1 caching
+- The ML model is trained on historical data and scores are relative to the dataset
+- Some races may have limited telemetry data depending on FastF1 availability
