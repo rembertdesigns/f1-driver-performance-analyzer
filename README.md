@@ -22,6 +22,8 @@ All charts are created with Plotly for a rich, interactive experience, including
 ### Comprehensive Analysis Views
 - **📊 Summary Insights**: High-level race metrics including fastest average lap, most consistent stint, and biggest performance drop-off
 - **⚡ Fastest & Consistent**: Identify the fastest single lap and most consistent driver performances
+<img width="874" height="708" alt="Screenshot 2025-08-12 at 11 00 22 AM" src="https://github.com/user-attachments/assets/a634a0a4-945f-48c9-bcf4-59a61fe95c7a" />
+
 - **⚔️ Driver vs. Driver**: Head-to-head lap time comparison between any two drivers in the race
 - **👥 Teammate Comparison**: The ultimate F1 benchmark - comparing drivers in identical machinery
 - **🧪 Stint Performance**: Analyze pace degradation and performance across different tire stints
