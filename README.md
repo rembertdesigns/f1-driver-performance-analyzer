@@ -28,6 +28,9 @@ All charts are created with Plotly for a rich, interactive experience, including
 <img width="1391" height="828" alt="Screenshot 2025-08-12 at 11 02 13 AM" src="https://github.com/user-attachments/assets/7fce2ce7-85c1-4c66-9326-e867394f2fff" />
 
 - **👥 Teammate Comparison**: The ultimate F1 benchmark - comparing drivers in identical machinery
+<img width="1398" height="808" alt="Screenshot 2025-08-12 at 11 04 03 AM" src="https://github.com/user-attachments/assets/31986c50-61a2-4613-bb2e-043e8eda0d3c" />
+
+  
 - **🧪 Stint Performance**: Analyze pace degradation and performance across different tire stints
 - **🛞 Tyre Compounds**: Performance analysis by tire compound (Soft, Medium, Hard)
 - **🧠 AI Driver Scoring**: ML-powered performance scoring based on key race metrics
