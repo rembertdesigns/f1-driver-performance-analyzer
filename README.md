@@ -1,6 +1,6 @@
 # 🏎️ F1 Driver Performance Analyzer
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://f1-driver-performance-analyzer.streamlit.app/)
+[**Launch Simulator**](https://f1-driver-performance-analyzer.streamlit.app/)
 
 <img width="1776" height="817" alt="Screenshot 2025-08-12 at 10 11 15 AM" src="https://github.com/user-attachments/assets/c9977c19-8d7a-485c-a9d4-1a5c7c9c160d" />
 
