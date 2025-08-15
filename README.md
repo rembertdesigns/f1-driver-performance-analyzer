@@ -101,24 +101,24 @@ f1-driver-performance-analyzer/
 ### Installation
 
 1. **Clone the repository:**
-```
+```bash
 git clone https://github.com/rembertdesigns/f1-driver-performance-analyzer.git
 cd f1-driver-performance-analyzer
 ```
 2. **Create and activate a virtual environment (recommended):**
-```
+```bash
 python3 -m venv venv
 source venv/bin/activate  # On macOS/Linux
 # On Windows: venv\Scripts\activate
 ```
 3. **Install dependencies:**
-```
+```bash
 pip install -r requirements.txt
 ```
 ### Data Collection
 
 4. **Collect F1 race data using FastF1:**
-```
+```bash
 python src/data_loader.py
 ```
 This will download race data from 2018-2024 and save CSV files to `data/sessions/`.
@@ -126,7 +126,7 @@ This will download race data from 2018-2024 and save CSV files to `data/sessions
 ### Model Training
 
 5. **Train the AI scoring model:**
-```
+```bash
 python train_model.py
 ```
 This creates `driver_score_model.pkl` in the `models/ directory`.
@@ -134,7 +134,7 @@ This creates `driver_score_model.pkl` in the `models/ directory`.
 ### Running the Application
 
 6. **Launch the Streamlit app:**
-```
+```bash
 streamlit run streamlit_app/app.py
 ```
 Then open your browser to the URL shown (typically http://localhost:8501).
