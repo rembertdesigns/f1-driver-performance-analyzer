@@ -2,8 +2,14 @@
 
 [**Launch Simulator**](https://f1-driver-performance-analyzer.streamlit.app/)
 
-<img width="1776" height="817" alt="Screenshot 2025-08-12 at 10 11 15 AM" src="https://github.com/user-attachments/assets/c9977c19-8d7a-485c-a9d4-1a5c7c9c160d" />
-
+<img 
+  width="1536" 
+  height="1024" 
+  alt="F1 Driver Performance Analyzer - Interactive dashboard for analyzing Formula 1 driver performance with AI-powered metrics, telemetry data, and head-to-head comparisons" 
+  title="F1 Driver Performance Analyzer Dashboard - Formula 1 Data Analytics Tool"
+  src="https://github.com/user-attachments/assets/e78efc58-b642-4977-9c2c-0e4ec40d8424"
+  loading="lazy"
+/>
 
 An interactive, multi-view dashboard built with Python and Streamlit to analyze and compare Formula 1 driver performance from historical race data using FastF1 telemetry.
 
